@@ -31,8 +31,14 @@ It's a plain web page with no build step and no dependencies.
 
 ## Updating the game
 
-After changing any file, bump `VERSION` in `sw.js` (e.g. `ironGrain-v2`), or
-phones keep the old cached copy. Also add any new file to the `FILES` list there.
+After changing any file, bump `VERSION` in `sw.js` (e.g. `ironGrain-v5`) and push.
+Phones check for updates every time the app opens. A new version downloads in
+the background and applies automatically: straight away on the title screen,
+otherwise the next time you return to it. The title screen shows the installed
+version. Add any new file to the `FILES` list in `sw.js`.
+
+Re-adding the app to the home screen gives it fresh storage, so saves and
+Ruler XP from the old icon are lost. Avoid that once a real game is under way.
 
 ## Checking it works
 

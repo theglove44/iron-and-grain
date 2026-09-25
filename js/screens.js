@@ -230,6 +230,7 @@ ACT.toTitle = () => { closeModal(); clearSel(); G = null; showTitle(); };
 // ---------- title & new game ----------
 const SETUP = {size:'medium', rivals:2, diff:1, legacy:'none', name:''};
 function showTitle() {
+  if (UI.updateReady) { save(); location.reload(); return; }
   const el = $('#title'); el.classList.remove('hidden'); $('#modal').classList.add('hidden');
   const lv = rulerLvl(), cur = P.xp - xpFor(lv), need = xpFor(lv + 1) - xpFor(lv), hasSave = !!localStorage.getItem(SAVE_KEY);
   const nxt = [...LEGACY.map(l => [l.lv, 'legacy ' + l.n]), ...DIFFS.map(d => [d.lv, d.n + ' difficulty'])].filter(([l]) => l > lv).sort((a, b) => a[0] - b[0])[0];
@@ -276,9 +277,9 @@ async function checkOffline() {
   const el = $('#offline'); if (!el) return;
   if (!('serviceWorker' in navigator) || !window.caches) { el.textContent = 'Offline mode is not available in this browser.'; return; }
   try {
-    const keys = await caches.keys(), k = keys.find(k => k === 'ironGrain-v3');
+    const keys = await caches.keys(), k = keys.filter(k => k.startsWith('ironGrain-')).sort().pop();
     const ok = k && await (await caches.open(k)).match('js/screens.js', {ignoreSearch:true});
-    el.textContent = ok ? '✓ Ready to play offline' : 'Preparing offline mode… reopen in a moment.';
+    el.textContent = ok ? `✓ Ready to play offline · version ${k.split('-v')[1]}` : 'Preparing offline mode… reopen in a moment.';
     el.classList.toggle('ok', !!ok);
   } catch (e) { el.textContent = ''; }
 }
@@ -296,7 +297,18 @@ function boot() {
   window.addEventListener('pagehide', save);
   showTitle();
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready).then(() => setTimeout(checkOffline, 800)).catch(() => {});
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(reg => {
+      reg.update().catch(() => {});
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+      return navigator.serviceWorker.ready;
+    }).then(() => setTimeout(checkOffline, 800)).catch(() => {});
+    // A new version took over: restart into it straight away on the title screen, or at the next return to the title.
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController) return;
+      if (!G) location.reload();
+      else { UI.updateReady = 1; toast('⬆️ Update downloaded. It applies when you return to the title screen.', 'gold'); }
+    });
   }
 }
 boot();
