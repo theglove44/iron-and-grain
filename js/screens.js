@@ -276,7 +276,7 @@ async function checkOffline() {
   const el = $('#offline'); if (!el) return;
   if (!('serviceWorker' in navigator) || !window.caches) { el.textContent = 'Offline mode is not available in this browser.'; return; }
   try {
-    const keys = await caches.keys(), k = keys.find(k => k === 'ironGrain-v2');
+    const keys = await caches.keys(), k = keys.find(k => k === 'ironGrain-v3');
     const ok = k && await (await caches.open(k)).match('js/screens.js', {ignoreSearch:true});
     el.textContent = ok ? '✓ Ready to play offline' : 'Preparing offline mode… reopen in a moment.';
     el.classList.toggle('ok', !!ok);
