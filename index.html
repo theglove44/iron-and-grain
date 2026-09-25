@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Iron &amp; Grain">
+<meta name="theme-color" content="#14110d">
+<meta name="description" content="Offline turn-based strategy: build a realm, research, conquer.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Iron &amp; Grain</title>
+<style>
+:root{--bg:#14110d;--p1:#1d1914;--p2:#29221b;--p3:#342b22;--ln:#44392d;--tx:#f4ead7;--mu:#b3a48a;--gd:#eab64d;--ok:#86d67d;--bad:#ff7d68;--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:14px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;touch-action:manipulation}
+body{position:fixed;inset:0}
+button{font:inherit;color:inherit;-webkit-appearance:none;appearance:none;cursor:pointer;margin:0}
+.hidden{display:none!important}
+#app{position:absolute;inset:0;display:flex;flex-direction:column}
+#hud{flex:none;padding:calc(var(--st) + 5px) 6px 5px;background:linear-gradient(#211b15,#18140f);border-bottom:1px solid var(--ln);z-index:4}
+#res{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
+.chip{background:var(--p2);border:0;border-radius:9px;padding:3px 1px 2px;text-align:center;line-height:1.05;min-width:0}
+.chip .ic{font-size:12px;display:block}
+.chip b{display:block;font-size:13px;font-variant-numeric:tabular-nums;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip i{display:block;font-style:normal;font-size:10px;color:var(--mu);font-variant-numeric:tabular-nums}
+.pos{color:var(--ok)!important}.neg{color:var(--bad)!important}
+.stat{display:flex;gap:8px;align-items:center;margin-top:5px;font-size:12px;white-space:nowrap}
+.stat>span{flex:none}
+#st-res{flex:1;min-width:0;display:flex;align-items:center;gap:6px;background:var(--p2);border-radius:8px;padding:4px 7px;border:0;font-size:12px}
+#st-res .rb{flex:none;width:44px;height:6px;background:#0e0c09;border-radius:3px;overflow:hidden}
+#st-rbar{height:100%;width:0;background:linear-gradient(90deg,#6fb8ff,#a98bff)}
+#st-rtxt{overflow:hidden;text-overflow:ellipsis;min-width:0}
+#st-res.pulse{animation:pulse 1.2s infinite}
+@keyframes pulse{50%{background:#5a431a}}
+#mapwrap{position:relative;flex:1;min-height:0;overflow:hidden}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#toasts{position:absolute;top:8px;left:8px;right:8px;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none;z-index:9}
+.toast{background:rgba(24,20,15,.95);border:1px solid var(--ln);border-left:4px solid var(--mu);padding:7px 11px;border-radius:10px;font-size:13px;max-width:100%;box-shadow:0 4px 16px rgba(0,0,0,.45);animation:tin .25s ease-out}
+.toast.good{border-left-color:var(--ok)}.toast.bad{border-left-color:var(--bad)}.toast.gold{border-left-color:var(--gd)}
+.toast.out{opacity:0;transition:opacity .4s}
+@keyframes tin{from{transform:translateY(-8px);opacity:0}}
+.mapbtn{position:absolute;bottom:10px;z-index:5;background:rgba(29,25,20,.93);border:1px solid var(--ln);border-radius:20px;padding:8px 13px;font-weight:600;font-size:13px;box-shadow:0 3px 12px rgba(0,0,0,.45)}
+#homebtn{right:8px}
+#nextu{right:62px;background:rgba(70,54,20,.96);border-color:#8a6a28}
+#sheet{position:absolute;left:6px;right:6px;bottom:6px;max-height:62%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:rgba(29,25,20,.97);border:1px solid var(--ln);border-radius:16px;padding:10px 10px 12px;z-index:7;box-shadow:0 -6px 30px rgba(0,0,0,.5);touch-action:pan-y}
+#nav{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) 1.5fr;gap:4px;padding:6px 6px calc(var(--sb) + 6px);background:#171410;border-top:1px solid var(--ln)}
+.nb{background:var(--p2);border:0;border-radius:11px;padding:5px 0 4px;font-size:10px;color:var(--mu);display:flex;flex-direction:column;align-items:center;gap:1px}
+.nb span{font-size:19px}
+#endturn{background:linear-gradient(#f2c562,#c98f2b);border:0;border-radius:12px;color:#2a1d06;font-weight:800;font-size:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+#endturn small{font-size:10px;font-weight:600;opacity:.8}
+.sh-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sh-i{font-size:26px;width:44px;height:44px;display:grid;place-items:center;background:var(--p2);border-radius:12px;flex:none}
+.sh-t{font-weight:700;font-size:16px}
+.sh-s{color:var(--mu);font-size:12px}
+.x{margin-left:auto;background:var(--p2);border:0;border-radius:50%;width:34px;height:34px;flex:none;font-size:14px}
+.kv{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;margin:2px 0 6px;color:var(--mu)}.kv b{color:var(--tx)}
+.opts{display:grid;gap:6px}
+.opt{display:flex;align-items:center;gap:10px;text-align:left;background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:8px 10px;width:100%}
+.opt:disabled{opacity:.45}
+.opt.cur{border-color:var(--gd);box-shadow:inset 0 0 0 1px var(--gd)}
+.opt .oi{font-size:22px;width:30px;text-align:center;flex:none}
+.opt .on{flex:1;min-width:0;font-weight:600}
+.opt .on small{display:block;font-weight:400;color:var(--mu);font-size:12px}
+.opt .oc{font-size:12px;text-align:right;flex:none}
+.opt .oc small{color:var(--mu)}
+.btn{background:var(--p2);border:1px solid var(--ln);border-radius:11px;padding:10px 12px;font-weight:600}
+.btn.pri{background:linear-gradient(#f2c562,#c98f2b);color:#2a1d06;border-color:#e0a940}
+.btn.red{background:#5a241c;border-color:#8a3a2c}
+.btn:disabled{opacity:.4}
+.row{display:flex;gap:6px;flex-wrap:wrap}.row>.btn{flex:1}
+.bar{height:6px;background:#0e0c09;border-radius:3px;overflow:hidden}.bar>div{height:100%;background:var(--gd)}
+.tag{display:inline-block;background:var(--p3);border-radius:6px;padding:1px 6px;font-size:11px;margin:1px}
+.hint{color:var(--mu);font-size:12px;margin-top:6px}
+.sect{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);margin:10px 0 5px}
+.attr{display:grid;grid-template-columns:80px 1fr 24px;gap:6px;align-items:center;font-size:12px;margin:3px 0}
+#modal{position:fixed;inset:0;background:rgba(5,4,3,.72);z-index:20;display:flex;align-items:flex-end;justify-content:center;padding:calc(var(--st) + 10px) 8px calc(var(--sb) + 8px)}
+#mc{background:var(--p1);border:1px solid var(--ln);border-radius:18px;width:100%;max-width:560px;max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:14px;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(20px);opacity:0}}
+.mh{display:flex;align-items:center;gap:8px;margin-bottom:10px}.mh h2{margin:0;font:700 19px Georgia,"Times New Roman",serif;color:var(--gd)}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}
+.tabs button{background:var(--p2);border:1px solid var(--ln);border-radius:20px;padding:6px 11px;font-size:13px;white-space:nowrap}
+.tabs button.on{background:var(--gd);color:#2a1d06;border-color:var(--gd)}
+.card{background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:10px;margin-bottom:6px}
+table.t{width:100%;border-collapse:collapse;font-size:13px}table.t td{padding:3px 0}table.t td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+#title{position:fixed;inset:0;z-index:30;background:radial-gradient(ellipse at 50% 15%,#3d2d17 0%,#15110c 60%,#0b0907 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(var(--st) + 18px) 16px calc(var(--sb) + 20px)}
+.logo{text-align:center;margin:10px 0 6px;font:800 40px/1 Georgia,"Times New Roman",serif;letter-spacing:.06em;background:linear-gradient(#ffe39a,#d99a32);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tagline{text-align:center;color:var(--mu);letter-spacing:.22em;font-size:11px;text-transform:uppercase}
+.crest{font-size:50px;text-align:center;margin-top:14px}
+.wrap{max-width:440px;margin:0 auto}
+.tbtns{display:grid;gap:10px;margin:20px 0}
+.tbtns .btn{padding:14px;font-size:16px}
+.seg{display:flex;gap:4px;background:var(--p2);border-radius:12px;padding:3px}
+.seg button{flex:1;border:0;background:none;padding:9px 4px;border-radius:9px;font-size:13px;font-weight:600}
+.seg button.on{background:var(--gd);color:#2a1d06}.seg button:disabled{opacity:.35}
+input.txt{width:100%;background:var(--p2);border:1px solid var(--ln);border-radius:10px;padding:10px;color:var(--tx);font:inherit;font-size:16px;-webkit-user-select:text;user-select:text}
+.offline{text-align:center;font-size:12px;margin-top:8px;color:var(--mu)}.offline.ok{color:var(--ok)}
+.help h3{color:var(--gd);font:700 15px Georgia,serif;margin:14px 0 4px}.help p,.help li{color:#e2d6c0;font-size:13px}.help ul{padding-left:18px;margin:4px 0}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hud">
+    <div id="res"></div>
+    <div class="stat"><span id="st-turn"></span><span id="st-pop"></span><span id="st-hap"></span>
+      <button id="st-res" data-a="research"><div class="rb"><div id="st-rbar"></div></div><span id="st-rtxt"></span></button></div>
+  </header>
+  <div id="mapwrap">
+    <canvas id="map"></canvas>
+    <div id="toasts"></div>
+    <button id="nextu" class="mapbtn hidden" data-a="nextUnit"></button>
+    <button id="homebtn" class="mapbtn" data-a="home">🏰</button>
+    <div id="sheet" class="hidden"></div>
+  </div>
+  <nav id="nav">
+    <button class="nb" data-a="buildMenu"><span>🏗️</span>Build</button>
+    <button class="nb" data-a="research"><span>🔬</span>Research</button>
+    <button class="nb" data-a="army"><span>⚔️</span>Army</button>
+    <button class="nb" data-a="realm"><span>👑</span>Realm</button>
+    <button class="nb" data-a="menu"><span>☰</span>Menu</button>
+    <button id="endturn" data-a="endTurn">End Turn<small id="et-sub"></small></button>
+  </nav>
+</div>
+<div id="modal" class="hidden"><div id="mc"></div></div>
+<div id="title"></div>
+<script src="js/data.js"></script>
+<script src="js/core.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/screens.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Iron & Grain",
+  "short_name": "Iron & Grain",
+  "description": "Offline turn-based strategy: build a realm, research, conquer.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14110d",
+  "theme_color": "#14110d",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
