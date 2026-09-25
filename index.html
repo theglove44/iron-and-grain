@@ -18,13 +18,15 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:14px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;touch-action:manipulation}
 body{position:fixed;inset:0}
+html{background:#171410}
+html.sa,html.sa body{height:100vh}html.sa body{bottom:auto}
 button{font:inherit;color:inherit;-webkit-appearance:none;appearance:none;cursor:pointer;margin:0}
 .hidden{display:none!important}
 #app{position:absolute;inset:0;display:flex;flex-direction:column}
 #hud{flex:none;padding:calc(var(--st) + 5px) 6px 5px;background:linear-gradient(#211b15,#18140f);border-bottom:1px solid var(--ln);z-index:4}
 #res{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px}
 .chip{background:var(--p2);border:0;border-radius:9px;padding:3px 1px 2px;text-align:center;line-height:1.05;min-width:0}
-.chip .ic{font-size:12px;display:block}
+.chip .ic{font-size:16px;line-height:1.15;display:block}
 .chip b{display:block;font-size:13px;font-variant-numeric:tabular-nums;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chip i{display:block;font-style:normal;font-size:10px;color:var(--mu);font-variant-numeric:tabular-nums}
 .pos{color:var(--ok)!important}.neg{color:var(--bad)!important}

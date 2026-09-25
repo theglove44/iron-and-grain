@@ -276,7 +276,7 @@ async function checkOffline() {
   const el = $('#offline'); if (!el) return;
   if (!('serviceWorker' in navigator) || !window.caches) { el.textContent = 'Offline mode is not available in this browser.'; return; }
   try {
-    const keys = await caches.keys(), k = keys.find(k => k.startsWith('ironGrain'));
+    const keys = await caches.keys(), k = keys.find(k => k === 'ironGrain-v2');
     const ok = k && await (await caches.open(k)).match('js/screens.js', {ignoreSearch:true});
     el.textContent = ok ? '✓ Ready to play offline' : 'Preparing offline mode… reopen in a moment.';
     el.classList.toggle('ok', !!ok);
@@ -290,6 +290,8 @@ function boot() {
   document.addEventListener('click', onClick);
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && !UI.lock) closeModal(); });
   window.addEventListener('resize', resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe($('#mapwrap'));
+  if (navigator.standalone || matchMedia('(display-mode: standalone)').matches) document.documentElement.classList.add('sa');
   document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
   window.addEventListener('pagehide', save);
   showTitle();

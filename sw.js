@@ -1,6 +1,6 @@
 // Offline support: cache every game file on first visit, then serve from the cache.
 // Bump VERSION whenever a game file changes so phones pick up the update.
-const VERSION = 'ironGrain-v1';
+const VERSION = 'ironGrain-v2';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png',
   'js/data.js', 'js/core.js', 'js/ai.js', 'js/render.js', 'js/ui.js', 'js/screens.js'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES))); self.skipWaiting(); });
